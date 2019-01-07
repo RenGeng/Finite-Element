@@ -2,12 +2,12 @@
 
 
 class Element:
-	def __init__(self, elem_type, tag, index):
+	def __init__(self, elem_type, physical, index):
 		self.type = elem_type
-		self.tag = tag
+		self.physical = physical # Bord ou domaine
 		self.list_index = []
 		for i in index:
 			self.list_index.append(int(i))
 
 	def __str__(self):
-		return "Type : " + str(self.type) + ", tag : " + str(self.tag) +", index : " + str(self.list_index)
+		return "Type : " + str(self.type) + ", tag : " + str(self.physical) +", index : " + str(self.list_index)

@@ -27,7 +27,7 @@ def read_msh(mesh):
 		file.readline()
 		file.readline()
 
-		nb_element = int(file.readline())
+		nb_element = int(file.readline()) # nombre totale d'élément
 		for i in range(nb_element):
 			element = map(int,file.readline().split(" ")) # transforme la liste en int
 			nb_tag = element[2]
