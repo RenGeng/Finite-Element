@@ -13,7 +13,7 @@ def read_msh(mesh):
 
 	list_element = [] # liste d'élément (triangles, segments)
 	
-	nb_triangle = 0
+	nb_noTriangle = 0 # nombre d'élément qui ne sont pas des triangles
 
 	i = 0
 	with open(mesh,"r") as file:
@@ -35,8 +35,8 @@ def read_msh(mesh):
 			element = map(int,file.readline().split(" ")) # transforme la liste en int
 			nb_tag = element[2]
 			# print element[3+nb_tag:]
-			if element[1] == 2: # quand c'est un triangle
-				nb_triangle += 1
+			if element[1] != 2: # quand c'est un edge
+				nb_noTriangle += 1
 			list_element.append(Element(element[1], element[3], element[3+nb_tag:]))
 
-	return nb_point,list_point,nb_element,list_element,nb_triangle
+	return nb_point,list_point,nb_element,list_element,nb_noTriangle
