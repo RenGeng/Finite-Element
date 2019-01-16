@@ -32,7 +32,8 @@ def read_msh(mesh):
 
 		nb_element = int(file.readline()) # nombre totale d'élément
 		for i in range(nb_element):
-			element = map(int,file.readline().split(" ")) # transforme la liste en int
+			element = list(map(int,file.readline().split(" ")))
+			# element = map(int,file.readline().split(" ")) # transforme la liste en int
 			nb_tag = element[2]
 			# print element[3+nb_tag:]
 			if element[1] != 2: # quand c'est un edge
