@@ -22,42 +22,15 @@ class Solveur:
 
 		return self.list_element[triangle-1].list_index[sommet] # -1 car on commence à 0
 
-	def assemblage(self):
-		M = np.zeros((self.nb_point,self.nb_point)) # Matrice de masse
-		D = np.zeros((self.nb_point,self.nb_point)) # Matrice de rigidité
-		B = np.zeros(self.nb_point)
-
-		grad_phi = [np.array([[-1,-1]]), np.array([[1,0]]), np.array([[0,1]])] # gradient de phi dans le triangle de ref
-
+	def matriceMasse(self):
+		self.M = np.zeros((self.nb_point,self.nb_point)) # Matrice de masse # à faire au format COO
 
 		for p in range(self.nb_noTriangle+1,self.nb_element+1):
 			p1 = self.list_point[self.loc2glob(p,0)-1] # -1 car on commence à 0
 			p2 = self.list_point[self.loc2glob(p,1)-1]
 			p3 = self.list_point[self.loc2glob(p,2)-1]
 
-			# print ("triangle: ", p)
-			# print ("index 0: ", self.loc2glob(p,0))
-			# print (p1)
-
-			# print ("index 1: ", self.loc2glob(p,1))
-			# print (p2)
-
-			# print ("index 2: ", self.loc2glob(p,2))
-			# print (p3)
-
 			det_jaccob = (p2[0] - p1[0])*(p3[1] - p1[1]) - (p3[0] - p1[0])*(p2[1] - p1[1])
-
-			B_rigidite = 1.0/det_jaccob * np.array([[p3[1] - p1[1], p1[1] - p2[1]],
-								   					[p1[0] - p3[0], p2[0] - p1[0]]])
-
-			print("1",B_rigidite)
-			# print()
-
-			print("2",np.transpose(B_rigidite))
-			B_rigidite = np.transpose(B_rigidite).dot(B_rigidite)
-			# B_rigidite = B_rigidite.dot(np.transpose(B_rigidite))
-			# print("2",B_rigidite)
-			print()
 
 			for i in range(3):
 				I = self.loc2glob(p,i) - 1
@@ -65,25 +38,69 @@ class Solveur:
 					J = self.loc2glob(p,j) - 1
 
 					if I == J:
-						M[I,J] += det_jaccob/12.0 # car 2 fois l'aire
+						self.M[I,J] += det_jaccob/12.0 # car 2 fois l'aire
 					else:
-						M[I,J] += det_jaccob/24.0
-
-					d_temp = grad_phi[j].dot(B_rigidite)
-					D[I,J] = det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i]))
-
-			B[I] += 1 # a faire
-
+						self.M[I,J] += det_jaccob/24.0
 
 
 		# Vérification
 
-			# Matrice de masse
+		# Matrice de masse
 		U = np.ones((self.nb_point,1))
-		# test = M.dot(U)
-		# print sum(test)
+		test = self.M.dot(U)
+		print(sum(test))
+
+	def matriceRigidite(self):
+		self.D = np.zeros((self.nb_point,self.nb_point)) # Matrice de rigidité # à faire au format COO
+
+		grad_phi = [np.array([[-1,-1]]), np.array([[1,0]]), np.array([[0,1]])] # gradient de phi dans le triangle de ref
+
+		for p in range(self.nb_noTriangle+1,self.nb_element+1):
+			p1 = self.list_point[self.loc2glob(p,0)-1] # -1 car on commence à 0
+			p2 = self.list_point[self.loc2glob(p,1)-1]
+			p3 = self.list_point[self.loc2glob(p,2)-1]
+
+			det_jaccob = (p2[0] - p1[0])*(p3[1] - p1[1]) - (p3[0] - p1[0])*(p2[1] - p1[1])
+
+			B_rigidite = 1.0/det_jaccob * np.array([[p3[1] - p1[1], p1[1] - p2[1]],
+								   					[p1[0] - p3[0], p2[0] - p1[0]]])
+
+			for i in range(3):
+				I = self.loc2glob(p,i) - 1
+				for j in range(3):
+					J = self.loc2glob(p,j) - 1
+					d_temp = grad_phi[j].dot(B_rigidite)
+					self.D[I,J] += det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i]))
+
+		# Vérification
 
 			# Matrice de rigidité
-		print(D.dot(U))
+		U = np.ones((self.nb_point,1))
+		print(sum(self.D.dot(U)))
 
-		return M,B
+
+	def assemblage(self):
+		self.matriceMasse()
+		self.matriceRigidite()
+
+		A = self.M + self.D
+		self.B = np.zeros(self.nb_point,dtype=complex)
+
+		print(self.list_point[0])
+
+		for index,element in enumerate(self.list_element):
+			if element.physical == 3: # bord du sous-marin
+				# print(index, " ", element)
+				for point in element.list_index: # les points du bord
+					# print(point," ",self.list_point[point])
+					A[point-1,:] = 0
+					A[:, point-1] = 0
+					A[point-1,point-1] = 1
+					self.B[point-1] = self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1])
+
+		np.savetxt("test.csv",A)
+		# print(A)
+		
+	def u_inc(self,x,y):
+		alpha = 1
+		return np.exp(np.complex(0,2*np.pi)*(x*np.cos(alpha) + y*np.sin(alpha)))
