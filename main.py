@@ -14,4 +14,5 @@ if __name__ == '__main__':
 
 	test.matriceMasse()
 	test.matriceRigidite()
+	test.matriceRobin()
 	test.assemblage()
