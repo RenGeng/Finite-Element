@@ -36,7 +36,7 @@ def read_msh(mesh):
 			# element = map(int,file.readline().split(" ")) # transforme la liste en int
 			nb_tag = element[2]
 			# print element[3+nb_tag:]
-			if element[1] != 2: # quand c'est un edge
+			if element[1] != 2: # quand c'est pas un triangle
 				nb_noTriangle += 1
 			list_element.append(Element(element[1], element[3], element[3+nb_tag:]))
 			# tag1 = 1 si c'est l'intérieur

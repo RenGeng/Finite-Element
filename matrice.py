@@ -3,7 +3,7 @@
 
 from read_msh import read_msh
 import numpy as np
-from scipy.sparse import coo_matrix,csr_matrix
+from scipy.sparse import coo_matrix,csr_matrix, linalg
 
 list_element = []
 
@@ -47,8 +47,7 @@ class Solveur:
 					ind_ligne.append(I)
 					ind_col.append(J)
 
-		self.M = coo_matrix((data, (ind_ligne,ind_col))).tocsr()
-
+		self.M = coo_matrix((data, (ind_ligne,ind_col)))#.tocsr()
 		# Vérification
 		U = np.ones((self.nb_point,1))
 		test = self.M.dot(U)
@@ -85,7 +84,7 @@ class Solveur:
 					# print det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i]))
 					data.append((det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i])))[0][0]) # [0][0] car dot donne une liste de liste avec seulement une valeur
 					
-		self.D = coo_matrix((data, (ind_ligne,ind_col))).tocsr()
+		self.D = coo_matrix((data, (ind_ligne,ind_col)))#.tocsr()
 		# Vérification
 		U = np.ones((self.nb_point,1))
 		print(sum(self.D.dot(U)))
@@ -95,25 +94,85 @@ class Solveur:
 		self.matriceMasse()
 		self.matriceRigidite()
 
-		A = self.M + self.D
-		self.B = np.zeros(self.nb_point,dtype=complex)
-
-		print(self.list_point[0])
+		self.A = (self.M + self.D).tolil() # pour faciliter la mise à 0 de la matrice
+		self.B = np.zeros((self.nb_point,1),dtype=complex)
 
 		for index,element in enumerate(self.list_element):
 			if element.physical == 3: # bord du sous-marin
 				# print(index, " ", element)
 				for point in element.list_index: # les points du bord
 					# print(point," ",self.list_point[point])
-					A[point-1,:] = 0
-					A[:, point-1] = 0
-					A[point-1,point-1] = 1
+					self.A[point-1,:] = 0
+					self.A[:, point-1] = 0
+					self.A[point-1,point-1] = 1
 					self.B[point-1] = self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1])
 
-		np.savetxt("test.csv",A)
+
+		self.A = self.A.tocsr()
+		print type(self.A)
+		self.U = linalg.spsolve(self.A, self.B)
+
+		# print self.U
+		np.savetxt("test.csv",self.U, delimiter=",")
+		# 
+		# print self.A
+		# np.savetxt("test.csv",self.A, delimiter = ",")
 		# print(A)
 		
 	def u_inc(self,x,y):
 		alpha = 1
 		return np.exp(np.complex(0,2*np.pi)*(x*np.cos(alpha) + y*np.sin(alpha)))
 
+
+	def export(self, output = "maillage.vtu"):
+		with open(output,"w") as file:
+			file.write('<VTKFile type="UnstructuredGrid" version="1.0" byte_order="LittleEndian" header_type="UInt64">')
+			file.write('\n<UnstructuredGrid>')
+			file.write('\n<Piece NumberOfPoints="' + str(self.nb_point) + '" NumberOfCells="' + str(self.nb_element) + '">')
+			file.write('\n<Points>')
+			file.write('\n<DataArray NumberOfComponents="3" type="Float64">')
+
+			for coordonnee in self.list_point:
+				file.write('\n' + str(coordonnee[0]) + ' ' + str(coordonnee[1]) + ' ' + str(coordonnee[2]))
+
+			file.write('\n</DataArray>')
+			file.write('\n</Points>')
+			file.write('\n<Cells>')
+			
+			offsets = "" # pour ne pas parcourir plusieurs fois les éléments
+			types = ""
+
+			file.write('\n<DataArray type="Int32" Name="connectivity">')
+			for indice, element in enumerate(self.list_element):
+				file.write('\n' + " ".join(str(s-1) for s in element.list_index))
+				offsets += "\n" + str((indice+1) * len(element.list_index))
+
+				if element.type == 1: # segment
+					types += "\n" + str(3) # 3 représente un segment pour paraview
+				elif element.type == 2: # triangle
+					types += "\n" + str(5) # 5 représente un triangle pour paraview
+			file.write('\n</DataArray>')
+
+			file.write('\n<DataArray type="Int32" Name="offsets">')
+			file.write(offsets)
+			file.write('\n</DataArray>')
+
+			file.write('\n<DataArray type="UInt8" Name="types">')
+			file.write(types)
+			file.write('\n</DataArray>')
+			file.write('\n</Cells>')
+
+
+			file.write('\n<PointData Scalars="solution">')
+
+			file.write('\n<DataArray type="Float64" Name="Real part" format="ascii">')
+			for reel in self.U.real:
+				file.write('\n'+str(reel))
+			file.write('\n</DataArray>')
+
+			file.write('\n<DataArray type="Float64" Name="Imag part" format="ascii">')
+			for imag in self.U.imag:
+				file.write('\n'+str(imag))
+			file.write('\n</DataArray>')
+
+			file.write('\n</PointData>\n</Piece>\n</UnstructuredGrid>\n</VTKFile>')
