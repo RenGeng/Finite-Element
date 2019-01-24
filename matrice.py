@@ -109,7 +109,7 @@ class Solveur:
 
 
 		self.A = self.A.tocsr()
-		print type(self.A)
+		# print type(self.A)
 		self.U = linalg.spsolve(self.A, self.B)
 
 		# print self.U
@@ -139,18 +139,24 @@ class Solveur:
 			file.write('\n</Points>')
 			file.write('\n<Cells>')
 			
+			off = 0 # valeur de offset en int
 			offsets = "" # pour ne pas parcourir plusieurs fois les éléments
 			types = ""
+
+
 
 			file.write('\n<DataArray type="Int32" Name="connectivity">')
 			for indice, element in enumerate(self.list_element):
 				file.write('\n' + " ".join(str(s-1) for s in element.list_index))
-				offsets += "\n" + str((indice+1) * len(element.list_index))
 
 				if element.type == 1: # segment
 					types += "\n" + str(3) # 3 représente un segment pour paraview
+					off += 2
 				elif element.type == 2: # triangle
 					types += "\n" + str(5) # 5 représente un triangle pour paraview
+					off += 3
+
+				offsets += "\n" + str(off)
 			file.write('\n</DataArray>')
 
 			file.write('\n<DataArray type="Int32" Name="offsets">')
