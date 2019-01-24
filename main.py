@@ -2,7 +2,7 @@
 
 import sys
 from matrice import Solveur
-
+from export import export
 
 
 
@@ -16,3 +16,4 @@ if __name__ == '__main__':
 	test.matriceRigidite()
 	test.matriceRobin()
 	test.assemblage()
+	export(test)

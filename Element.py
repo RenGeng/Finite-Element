@@ -10,4 +10,4 @@ class Element:
 			self.list_index.append(int(i))
 
 	def __str__(self):
-		return "Type : " + str(self.type) + ", tag : " + str(self.physical) +", index : " + str(self.list_index)
+		return "Type : " + str(self.type) + ", bord : " + str(self.physical) +", index : " + str(self.list_index)

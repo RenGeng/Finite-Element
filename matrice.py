@@ -3,16 +3,16 @@
 
 from read_msh import read_msh
 import numpy as np
-from scipy.sparse import coo_matrix,csr_matrix
+from scipy.sparse import coo_matrix,csr_matrix, linalg
 
-list_element = []
+k = 2 * np.pi # nombre d'onde
 
 class Solveur:
 	def __init__(self,mesh_file):
 		if mesh_file == None:
 			raise ValueError("Veuillez fournir un fichier .msh à notre solveur")
 		self.nb_point,self.list_point,self.nb_element,self.list_element,self.nb_noTriangle = read_msh(mesh_file)
-		# Le nombre de edge est ici pour sauter les premières éléments qui sont des arêtes
+		# Le nb.noTriangle est ici pour sauter les premières éléments qui sont des arêtes
 
 	def loc2glob(self,triangle, sommet):
 		if sommet <= 0 and sommet > 3:
@@ -42,8 +42,10 @@ class Solveur:
 
 					if I == J:
 						data.append(det_jaccob/12.0)
+						# data.append(np.complex(0,1)*k*k*det_jaccob/12.0)
 					else:
 						data.append(det_jaccob/24.0)
+						# data.append(np.complex(0,1)*k*k*det_jaccob/24.0)
 					ind_ligne.append(I)
 					ind_col.append(J)
 
@@ -101,18 +103,14 @@ class Solveur:
 		data = []
 		ind_ligne = []
 		ind_col = []
-		for p in range(0,self.nb_noTriangle+1):
-			#print("Robin")
-			if self.list_element[p-1].physical == 2: # bord de l
+		for p in range(1,self.nb_noTriangle+1):
+			# print("Robin")
+			if self.list_element[p-1].physical == 2: # bord de l'ellipse
 				p1 = self.list_point[self.loc2glob(p,0)-1] # -1 car on commence à 0
 				p2 = self.list_point[self.loc2glob(p,1)-1]
-				#p3 = self.list_point[self.loc2glob(p,2)-1]
-				#print("type",self.list_element[p-1].physical)
-				#print("p",p,":",p1,p2,p3)
 
 				#sigma =[p1,p2]
 				sigma = np.linalg.norm((p1[0]-p2[0],p1[1]-p2[1]))
-
 				for i in range(2):
 					I = self.loc2glob(p,i) - 1
 					for j in range(2):
@@ -120,8 +118,10 @@ class Solveur:
 
 						if I == J:
 							data.append(sigma/3.0)
+							# data.append(-np.complex(0,1)*sigma/3.0)
 						else:
 							data.append(sigma/6.0)
+							# data.append(-np.complex(0,1)*sigma/6.0)
 						ind_ligne.append(I)
 						ind_col.append(J)
 
@@ -131,29 +131,30 @@ class Solveur:
 
 
 	def assemblage(self):
-		self.matriceMasse()
-		self.matriceRigidite()
+		# self.matriceMasse()
+		# self.matriceRigidite()
 
-		A = self.M + self.D + self.Mbord
+		self.A = (self.M + self.D + self.Mbord).tolil() # pour faciliter la mise à 0 de la matrice
 		self.B = np.zeros(self.nb_point,dtype=complex)
 
 		print(self.list_point[0])
-
-		for index,element in enumerate(self.list_element):
+		for index, element in enumerate(self.list_element):
 			if element.physical == 3: # bord du sous-marin
 				# print(index, " ", element)
 				for point in element.list_index: # les points du bord
-					# print(point," ",self.list_point[point])
-					A[point-1,:] = 0
-					A[:, point-1] = 0
-					A[point-1,point-1] = 1
-					self.B[point-1] = self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1])
+					#print(point," ",self.list_point[point])
+					self.A[point-1,:] = 0
+					# self.A[:, point-1] = 0
+					self.A[point-1,point-1] = 1
+					self.B[point-1] = -self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1])
 
-		np.savetxt("test.data",A.todense(),fmt='%.8f')
-		np.savetxt("points.csv",self.list_point,delimiter=",",header="X,Y,Z")
-		print(A.shape)
+		self.A = self.A.tocsr()
+		self.U = linalg.spsolve(self.A, self.B)
+
+		#np.savetxt("test.data",A.todense(),fmt='%.8f')
+		#np.savetxt("points.csv",self.list_point,delimiter=",",header="X,Y,Z")
 		
 	def u_inc(self,x,y):
 		alpha = 1
-		return np.exp(np.complex(0,2*np.pi)*(x*np.cos(alpha) + y*np.sin(alpha)))
+		return np.exp(np.complex(0,1)*k*(x*np.cos(alpha) + y*np.sin(alpha)))
 
