@@ -150,6 +150,7 @@ class Solveur:
 					self.B[point-1] = self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1])
 
 		np.savetxt("test.data",A.todense(),fmt='%.8f')
+		np.savetxt("points.csv",self.list_point,delimiter=",",header="X,Y,Z")
 		print(A.shape)
 		
 	def u_inc(self,x,y):

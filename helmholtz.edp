@@ -1,0 +1,59 @@
+load "gmsh";
+mesh Th=gmshload("sous-marin.msh");
+// plot(Th, wait= true, cmm = "Mon superbe maillage");
+
+//real x0=0, x1=1;
+//real y0=0, y1=1;
+//int n=5,m=20;
+//mesh Th = square(n,m,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+// fespace Vh(Th, P1);
+// func g = x*x + y*y;
+// Vh uh,vh; // vh sera la fonction test
+
+// solve MonProbleme(uh,vh) = int2d(Th)(dx(uh)*dx(vh)) + int2d(Th)(dy(uh)*dy(vh)) + int2d(Th)(uh*vh) - int2d(Th)(f*vh);
+
+// border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+// border b(t=0,2*pi){ x=0.3+0.3*cos(t); y=0.3*sin(t);label=2;}
+// // plot (a(50)+b(+30)) ;
+// mesh Thwithouthole= buildmesh(a(50)+b(+30));
+// mesh Thwithhole= buildmesh(a(50)+b(-30));
+
+
+// border C(t=0,2*pi){x=cos(t);y=sin(t);}
+
+// mesh Th =buildmesh(C(50));
+// border T= 
+fespace Vh(Th, P1);
+Vh<complex> uh,vh;
+// func f=x*x+y*y;
+// func f = 2*pi*pi*sin(pi*x)*sin(pi*y);
+complex L=1i;
+real k = 2*pi;
+real alpha = pi/2;
+func uinc=exp(k*L*(x*cos(alpha) + y*sin(alpha)));
+
+real cpu=clock();
+
+varf Helmholtz(uh,vh) = -int2d(Th)(dx(uh)*dx(vh)) -int2d(Th)(dy(uh)*dy(vh))
++ int2d(Th)(k*k*uh*vh) + on (3,uh=-uinc) - int1d(Th,2)(L*k*uh*vh);//+ int1d(Th,C)((10*uh+cos(y))*vh);
+// + on (C,uh=0)  ;
+// plot(uh,wait = true, cmm = "Solution", value = true, fill = true, dim = 3);
+// cout<<"CPU time="<<clock()-cpu<<endl;
+
+// matrix<complex> A = Helmholtz( Vh, Vh);
+// Vh<complex> B, solution;
+// B[] = Helmholtz(0, Vh);
+// solution[] = A^-1 * B[];
+// func Usol=sin(pi*x)*sin(pi*y);
+// Vh gh = Usol; 
+// plot(solution, wait = true, cmm = "Solution", value = true, fill = true, dim = 2);
+
+// { 
+//   ofstream fout("mat_FF.txt") ;
+//   fout << A << endl ;
+// }  
+
+solve HelmholtzS(uh,vh) = -int2d(Th)(dx(uh)*dx(vh)) -int2d(Th)(dy(uh)*dy(vh)) 
++ int2d(Th)(k*k*(uh)*(vh)) + on (3,uh=-uinc) - int1d(Th,2)(L*k*uh*vh);
+plot(uh,wait = true, cmm = "Solution", value = true, fill = true, dim = 2);
