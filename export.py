@@ -46,7 +46,7 @@ def read_msh(mesh):
 			# print element[3+nb_tag:]
 			if element[1] != 2: # quand c'est un edge
 				nb_noTriangle += 1
-			        list_element.append(Element(element[1], element[3], element[3+nb_tag:]))
+				list_element.append(Element(element[1], element[3], element[3+nb_tag:]))
 			        # tag1 = 1 si c'est l'intérieur
 			        # tag1 = 2 si c'est l'ellips
 			        # tag1 = 3 si c'est le sous-marin

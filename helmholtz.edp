@@ -38,23 +38,41 @@ real cpu=clock();
 
 varf Helmholtz(uh,vh) = -int2d(Th)(dx(uh)*dx(vh)) -int2d(Th)(dy(uh)*dy(vh))
 + int2d(Th)(k*k*uh*vh) + on (3,uh=-uinc) - int1d(Th,2)(L*k*uh*vh);
+
+// varf Helmholtz(uh,vh) = -int2d(Th)(dx(uh)*dx(vh)) -int2d(Th)(dy(uh)*dy(vh));
+
 // + on (C,uh=0)  ;
 // plot(uh,wait = true, cmm = "Solution", value = true, fill = true, dim = 3);
 // cout<<"CPU time="<<clock()-cpu<<endl;
 
-matrix<complex> A = Helmholtz( Vh, Vh);
-Vh<complex> B, solution;
-B[] = Helmholtz(0, Vh);
-solution[] = A^-1 * B[];
-func Usol=sin(pi*x)*sin(pi*y);
-Vh gh = Usol; 
-plot(solution, wait = true, cmm = "Solution", value = true, fill = true, dim = 2);
+// matrix<complex> A = Helmholtz( Vh, Vh);
+// Vh<complex> B, solution;
+// B[] = Helmholtz(0, Vh);
+// solution[] = A^-1 * B[];
 
-{ 
-  ofstream fout("Data/mat_FF.txt") ;
-  fout << A << endl ;
-}  
+// { 
+//   ofstream fout("Data/mat_B.txt") ;
+//   fout << B[] << endl ;
+// }  
 
+// func Usol=sin(pi*x)*sin(pi*y);
+// Vh gh = Usol; 
+// plot(solution, wait = true, cmm = "Solution", value = true, fill = true, dim = 2);
+
+// { 
+//   ofstream fout("Data/mat_FF.txt") ;
+//   fout << A << endl ;
+// }  
+
+
+// couleur de plot
+real[int] colorhsv=[ // color hsv model
+    4./6., 1 , 0.5, // dark blue
+    4./6., 1 , 1, // blue
+    5./6., 1 , 1, // magenta
+    1, 1. , 1, // red
+    1, 0.5 , 1 // light red
+    ];
 
 
 solve HelmholtzS(uh,vh) = -int2d(Th)(dx(uh)*dx(vh)) -int2d(Th)(dy(uh)*dy(vh)) 
@@ -69,7 +87,9 @@ Vh<complex> uabs = abs(uh + uinc);
 Vh<complex> ure = real(uh);
 Vh<complex> uim = imag(uh);
 
-// plot(uh,wait = true, cmm = "Solution", value = true, fill = true, dim = 2);
+plot(uh,wait = true, cmm = "Solution complet", value = true, fill = true, dim = 2, hsv=colorhsv);
+plot(ure,wait = true, cmm = "Solution relle", value = true, fill = true, dim = 2, hsv=colorhsv);
+plot(uim,wait = true, cmm = "Solution imaginaire", value = true, fill = true, dim = 2, hsv=colorhsv);
 
 // Pour obtenir les parties réelles, valeur absolue :
 
