@@ -49,7 +49,7 @@ class Solveur:
 					ind_ligne.append(I)
 					ind_col.append(J)
 
-		self.M = coo_matrix((data, (ind_ligne,ind_col))).tocsr()
+		self.M = coo_matrix((data, (ind_ligne,ind_col)),dtype=complex).tocsr()
 
 		# Vérification
 		U = np.ones((self.nb_point,1))
@@ -88,11 +88,11 @@ class Solveur:
 					# print det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i]))
 					data.append((det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i])))[0][0]) # [0][0] car dot donne une liste de liste avec seulement une valeur
 					
-		self.D = coo_matrix((data, (ind_ligne,ind_col))).tocsr()
+		self.D = coo_matrix((data, (ind_ligne,ind_col)),dtype=complex).tocsr()
 		print("Shape:",self.D.shape)
 		# Vérification
-#		U = np.ones((self.nb_point,1))
-#		print(sum(self.D.dot(U)))
+		U = np.ones((self.nb_point,1))
+		print(sum(self.D.dot(U)))
 
 
 	def matriceRobin(self):
@@ -103,7 +103,7 @@ class Solveur:
 		data = []
 		ind_ligne = []
 		ind_col = []
-		for p in range(1,self.nb_noTriangle+1):
+		for p in range(self.nb_noTriangle+1):
 			# print("Robin")
 			if self.list_element[p-1].physical == 2: # bord de l'ellipse
 				p1 = self.list_point[self.loc2glob(p,0)-1] # -1 car on commence à 0
@@ -125,7 +125,7 @@ class Solveur:
 						ind_ligne.append(I)
 						ind_col.append(J)
 
-		self.Mbord = coo_matrix((data, (ind_ligne,ind_col)),shape=(self.nb_point, self.nb_point)).tocsr()
+		self.Mbord = coo_matrix((data, (ind_ligne,ind_col)),shape=(self.nb_point, self.nb_point),dtype=complex).tocsr()
 		print("Mbord",self.Mbord.todense())
 		print("Shape:",self.Mbord.shape)
 
@@ -149,12 +149,28 @@ class Solveur:
 					self.B[point-1] = -self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1])
 
 		self.A = self.A.tocsr()
+		print(self.A)
 		self.U = linalg.spsolve(self.A, self.B)
 
-		#np.savetxt("test.data",A.todense(),fmt='%.8f')
+		np.savetxt("Data/U.data",self.U,fmt='%.12f')
+		# np.savez("Data/A.data",self.A)
 		#np.savetxt("points.csv",self.list_point,delimiter=",",header="X,Y,Z")
 		
 	def u_inc(self,x,y):
 		alpha = 1
 		return np.exp(np.complex(0,1)*k*(x*np.cos(alpha) + y*np.sin(alpha)))
+
+	# def save_sparse_matrix(filename, x):
+	#     x_csr = x.tocsr()
+	#     row = x_csr.row
+	#     col = x_csr.col
+	#     data = x_csr.data
+	#     shape = x_csr.shape
+	#     np.savez(filename, row=row, col=col, data=data, shape=shape)
+
+
+	# def load_sparse_matrix(filename):
+	#     y = np.load(filename)
+	#     z = sparse.csr_matrix((y['data'], (y['row'], y['col'])), shape=y['shape'])
+	# 	return z
 

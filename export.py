@@ -53,7 +53,7 @@ def read_msh(mesh):
 	return nb_point,list_point,nb_element,list_element,nb_noTriangle
 
 
-def export(solution, output = "maillage.vtu"):
+def export(solution, output = "Data/maillage.vtu"):
 	"""
 	export la solution trouvé au format .vtu lisible par paraview
 

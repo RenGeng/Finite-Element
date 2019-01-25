@@ -19,7 +19,7 @@ Plane Surface(1) = {1};
 
 R1 = 1;
 R2 = 0.5;
-h = 0.01;
+h = 10.01;
 L = 1;
 
 
@@ -93,3 +93,9 @@ Physical Surface(1) = {1};
 
 Physical Line(2) = {1,2,3,4}; // Ellipse
 Physical Line(3) = {5,7,8,9,10,11,12,14,15,16,17,19,6}; // Sous-marin
+//+
+Characteristic Length {12} = 1;
+//+
+Characteristic Length {12} = 1;
+//+
+Characteristic Length {12} = 1;
