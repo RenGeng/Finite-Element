@@ -56,16 +56,9 @@ class Solveur:
 						# data.append(np.complex(0,1)*k*k*det_jaccob/24.0)
 					ind_ligne.append(I)
 					ind_col.append(J)
-
-<<<<<<< HEAD:python/matrice.py
-
-=======
+					
 		# self.M = coo_matrix((np.array(data)*self.k*self.k, (ind_ligne,ind_col))).tocsr()
 		self.M = coo_matrix((np.array(data)*-self.k*self.k, (ind_ligne,ind_col))).tocsr() # prof
-
-		# print("\n\n\n",self.M)
-		# np.savetxt("Data/M.csv",self.M.todense(),fmt='%.12f',delimiter=',')
->>>>>>> 1438f542c58ab5c7c8bb73c92b46109c480354b0:matrice.py
 
 		# Vérification
 		print("################### Vérification pour la matrice de masse ##################")
@@ -146,12 +139,8 @@ class Solveur:
 						ind_ligne.append(I)
 						ind_col.append(J)
 
-<<<<<<< HEAD:python/matrice.py
-
-=======
 		self.Mbord = coo_matrix((np.array(data)*np.complex(0,-self.k), (ind_ligne,ind_col)),shape=(self.nb_point, self.nb_point),dtype=complex).tocsr()
 		
->>>>>>> 1438f542c58ab5c7c8bb73c92b46109c480354b0:matrice.py
 		print("################## Matrice de bord ##################")
 		# print("Mbord",self.Mbord.todense())
 		print("Shape:",self.Mbord.shape)
@@ -179,10 +168,7 @@ class Solveur:
 
 		self.A = self.A.tocsr()
 		print("################## Assemblage ##################")
-		
-<<<<<<< HEAD:python/matrice.py
-=======
->>>>>>> 1438f542c58ab5c7c8bb73c92b46109c480354b0:matrice.py
+
 		self.U = linalg.spsolve(self.A, self.B)
 
 	def export_all(self):
@@ -197,11 +183,8 @@ class Solveur:
 		np.savetxt("Mat/U.csv",self.U,fmt='%.12f',delimiter=',')
 
 	def u_inc(self,x,y):
-<<<<<<< HEAD:python/matrice.py
-=======
 		alpha = self.alpha
 		return np.exp(np.complex(0,1)*self.k*(x*np.cos(alpha) + y*np.sin(alpha)))
->>>>>>> 1438f542c58ab5c7c8bb73c92b46109c480354b0:matrice.py
 
 	# def save_sparse_matrix(filename, x):
 	#     x_csr = x.tocsr()
