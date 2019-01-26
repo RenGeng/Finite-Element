@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*
 
 import sys
+sys.path.insert(0,'python/')
 from matrice import Solveur
 from export import export
 
@@ -16,4 +17,5 @@ if __name__ == '__main__':
 	test.matriceRigidite()
 	test.matriceRobin()
 	test.assemblage()
+	test.export_all()
 	export(test)

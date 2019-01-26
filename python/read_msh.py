@@ -9,6 +9,15 @@ Fonction permettant de lire le fichier .msh généré par GMSH
 from Element import Element
 
 def read_msh(mesh):
+	"""
+	Lecture du fichier mesh en entrée et retourne:
+		- le nombre de point composant le mesh
+		- la liste des coordonnées de chaque point
+		- le nombre d'élément (segment, triangle, ...)
+		- la liste des éléments (voir classe Element)
+		- le nombre d'élément qui n'est pas un triangle (pour travailler sur les segments)
+	"""
+	
 	list_point = [] # liste de points
 
 	list_element = [] # liste d'élément (triangles, segments)

@@ -49,10 +49,8 @@ class Solveur:
 					ind_ligne.append(I)
 					ind_col.append(J)
 
-		self.M = coo_matrix((np.array(data)*k*k, (ind_ligne,ind_col))).tocsr()
-
-		# print("\n\n\n",self.M)
-		# np.savetxt("Data/M.csv",self.M.todense(),fmt='%.12f',delimiter=',')
+		# self.M = coo_matrix((np.array(data)*k*k, (ind_ligne,ind_col))).tocsr()
+		self.M = coo_matrix((np.array(data)*-k*k, (ind_ligne,ind_col))).tocsr() # prof
 
 		# Vérification
 		print("################### Vérification pour la matrice de masse ##################")
@@ -90,15 +88,12 @@ class Solveur:
 					ind_col.append(J)
 
 					d_temp = grad_phi[j].dot(B_temp)
-					
-					# D[I,J] += det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i]))
-					# print det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i]))
-					data.append((-det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i])))[0][0]) # [0][0] car dot donne une liste de liste avec seulement une valeur
-					
-		self.D = coo_matrix((data, (ind_ligne,ind_col))).tocsr()
-	
-		# np.savetxt("Data/D.csv",self.D.todense(),fmt='%.12f',delimiter=',')
 
+					# data.append((-det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i])))[0][0]) # [0][0] car dot donne une liste de liste avec seulement une valeur
+					data.append((det_jaccob/2.0 * d_temp.dot(np.transpose(grad_phi[i])))[0][0]) # prof
+
+		self.D = coo_matrix((data, (ind_ligne,ind_col))).tocsr()
+		
 		# Vérification
 		print("################## Vérification pour la matrice de rigidité ##################")
 		print("Shape:",self.D.shape)
@@ -137,7 +132,7 @@ class Solveur:
 						ind_col.append(J)
 
 		self.Mbord = coo_matrix((np.array(data)*np.complex(0,-k), (ind_ligne,ind_col)),shape=(self.nb_point, self.nb_point),dtype=complex).tocsr()
-		
+
 		print("################## Matrice de bord ##################")
 		# print("Mbord",self.Mbord.todense())
 		print("Shape:",self.Mbord.shape)
@@ -159,23 +154,28 @@ class Solveur:
 					self.A[point-1,:] = 0
 					# self.A[:, point-1] = 0
 					self.A[point-1,point-1] = 1
-					self.B[point-1] = -self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1])
+					self.B[point-1] = self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1])
+
+
 
 		self.A = self.A.tocsr()
-
 		print("################## Assemblage ##################")
 		
-		for i in self.B:
-			print(i)
-		# print(self.B)
 		self.U = linalg.spsolve(self.A, self.B)
 
-		# np.savetxt("Data/U.csv",self.U,fmt='%.12f',delimiter=',')
-		# np.savez("Data/A.data",self.A)
-		#np.savetxt("points.csv",self.list_point,delimiter=",",header="X,Y,Z")
-		
+	def export_all(self):
+		"""
+		Fonction qui va générer tous les matrices (rigidité, masse, bord, ...) afin de vérifier avec FreeFem
+		"""
+		np.savetxt("Mat/M.csv",self.M.todense(),fmt='%.12f',delimiter=',')
+		np.savetxt("Mat/D.csv",self.D.todense(),fmt='%.12f',delimiter=',')
+		np.savetxt("Mat/Mbord.csv",self.Mbord.todense(),fmt='%.12f',delimiter=',')
+		np.savetxt("Mat/A.csv",self.A.todense(),fmt='%.12f',delimiter=',')
+		np.savetxt("Mat/B.csv",self.B,fmt='%.12f',delimiter=',')
+		np.savetxt("Mat/U.csv",self.U,fmt='%.12f',delimiter=',')
+
 	def u_inc(self,x,y):
-		alpha = np.pi/2
+		alpha = 0
 		return np.exp(np.complex(0,1)*k*(x*np.cos(alpha) + y*np.sin(alpha)))
 
 	# def save_sparse_matrix(filename, x):
