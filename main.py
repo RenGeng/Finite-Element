@@ -31,11 +31,11 @@ if __name__ == '__main__':
 
 	parser.add_argument("-a", "--alpha",
 	                dest="alpha", default=pi/2,metavar="r",
-	                help="Valuer de la variable alpha [par defaut pi/2]",type=float)
+	                help="Valeur de la variable alpha [par defaut pi/2]",type=float)
 
 	parser.add_argument("-k",
 	                dest="k", default=2*pi,metavar="r",
-	                help="Valuer de la variable k [par defaut 2*pi]",type=float)
+	                help="Valeur de la variable k [par defaut 2*pi]",type=float)
 
 	args = parser.parse_args()
 
