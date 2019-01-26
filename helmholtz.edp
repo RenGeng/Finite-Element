@@ -1,14 +1,14 @@
-// load "gmsh";
+load "gmsh";
 // mesh Th=gmshload("Data/sous-marin.msh");
-// mesh Th=gmshload("Data/easySurf.msh");
-// plot(Th, wait= true, cmm = "Mon superbe maillage");
+mesh Th=gmshload("Data/easySurf.msh");
+plot(Th, wait= true, cmm = "Mon superbe maillage");
 
-border a(t=0,2*pi){ x=cos(t); y=sin(t);label=3;}
-border b(t=0,2*pi){ x=0.3+0.3*cos(t); y=0.3*sin(t);label=2;}
-mesh Th= buildmesh(a(50)+b(-30));
+// border a(t=0,2*pi){ x=cos(t); y=sin(t);label=3;}
+// border b(t=0,2*pi){ x=0.3+0.3*cos(t); y=0.3*sin(t);label=2;}
+// mesh Th= buildmesh(a(50)+b(-30));
 
 plot(Th, wait= true, cmm = "Mon superbe maillage");
-savemesh(Th,"Th.msh");
+// savemesh(Th,"Th.msh");
 
 
 fespace Vh(Th, P1);
@@ -18,6 +18,8 @@ complex L=1i;
 real k = 2*pi;
 real alpha = pi/2;
 func uinc=exp(k*L*(x*cos(alpha) + y*sin(alpha)));
+
+// ************* Matrix Resolution of the Problem *************  
 
 // real cpu=clock();
 
@@ -43,6 +45,7 @@ func uinc=exp(k*L*(x*cos(alpha) + y*sin(alpha)));
 //   fout << A << endl ;
 // }  
 
+// ************* End of Matrix Resolution  ************* 
 
 // couleur de plot
 real[int] colorhsv=[ // color hsv model
@@ -56,7 +59,7 @@ real[int] colorhsv=[ // color hsv model
 real cpu=clock();
 solve HelmholtzS(uh,vh) = -int2d(Th)(dx(uh)*dx(vh)) -int2d(Th)(dy(uh)*dy(vh)) 
 + int2d(Th)(k*k*(uh)*(vh)) + on (3,uh=-uinc) - int1d(Th,2)(L*k*uh*vh);
-// cout<<"CPU time="<<clock()-cpu<<endl;
+cout<<"CPU time="<<clock()-cpu<<endl;
 
 { 
   ofstream fout2("Data/mat_U.txt") ;
