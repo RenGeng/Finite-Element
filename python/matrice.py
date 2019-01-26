@@ -5,13 +5,21 @@ from read_msh import read_msh
 import numpy as np
 from scipy.sparse import coo_matrix,csr_matrix, linalg
 
-k = 2 * np.pi # nombre d'onde
+# k = 10#2 * np.pi # nombre d'onde
 
 class Solveur:
-	def __init__(self,mesh_file):
+	def __init__(self,mesh_file,k,alpha,PhysicalDir,PhysicalRob):
 		if mesh_file == None:
 			raise ValueError("Veuillez fournir un fichier .msh à notre solveur")
 		self.nb_point,self.list_point,self.nb_element,self.list_element,self.nb_noTriangle = read_msh(mesh_file)
+
+		self.k = k
+		self.alpha =alpha 
+		self.PhysicalDir = PhysicalDir
+		self.PhysicalRob = PhysicalRob
+
+		print("")
+		print("k=",k," alpha=",alpha," Physical Dirichlet=",PhysicalDir," Physical Robin-Fourier=",PhysicalRob,"\n\n")
 		# Le nb.noTriangle est ici pour sauter les premières éléments qui sont des arêtes
 
 	def loc2glob(self,triangle, sommet):
@@ -49,8 +57,15 @@ class Solveur:
 					ind_ligne.append(I)
 					ind_col.append(J)
 
-		# self.M = coo_matrix((np.array(data)*k*k, (ind_ligne,ind_col))).tocsr()
-		self.M = coo_matrix((np.array(data)*-k*k, (ind_ligne,ind_col))).tocsr() # prof
+<<<<<<< HEAD:python/matrice.py
+
+=======
+		# self.M = coo_matrix((np.array(data)*self.k*self.k, (ind_ligne,ind_col))).tocsr()
+		self.M = coo_matrix((np.array(data)*-self.k*self.k, (ind_ligne,ind_col))).tocsr() # prof
+
+		# print("\n\n\n",self.M)
+		# np.savetxt("Data/M.csv",self.M.todense(),fmt='%.12f',delimiter=',')
+>>>>>>> 1438f542c58ab5c7c8bb73c92b46109c480354b0:matrice.py
 
 		# Vérification
 		print("################### Vérification pour la matrice de masse ##################")
@@ -111,7 +126,7 @@ class Solveur:
 		ind_col = []
 		for p in range(self.nb_noTriangle+1):
 			# print("Robin")
-			if self.list_element[p-1].physical == 2: # bord de l'ellipse
+			if self.list_element[p-1].physical == self.PhysicalRob: # bord de l'ellipse
 				p1 = self.list_point[self.loc2glob(p,0)-1] # -1 car on commence à 0
 				p2 = self.list_point[self.loc2glob(p,1)-1]
 
@@ -131,8 +146,12 @@ class Solveur:
 						ind_ligne.append(I)
 						ind_col.append(J)
 
-		self.Mbord = coo_matrix((np.array(data)*np.complex(0,-k), (ind_ligne,ind_col)),shape=(self.nb_point, self.nb_point),dtype=complex).tocsr()
+<<<<<<< HEAD:python/matrice.py
 
+=======
+		self.Mbord = coo_matrix((np.array(data)*np.complex(0,-self.k), (ind_ligne,ind_col)),shape=(self.nb_point, self.nb_point),dtype=complex).tocsr()
+		
+>>>>>>> 1438f542c58ab5c7c8bb73c92b46109c480354b0:matrice.py
 		print("################## Matrice de bord ##################")
 		# print("Mbord",self.Mbord.todense())
 		print("Shape:",self.Mbord.shape)
@@ -147,7 +166,7 @@ class Solveur:
 		self.B = np.zeros(self.nb_point,dtype=complex)
 
 		for index, element in enumerate(self.list_element):
-			if element.physical == 3: # bord du sous-marin
+			if element.physical == self.PhysicalDir: # bord du sous-marin
 				# print(index, " ", element)
 				for point in element.list_index: # les points du bord
 					#print(point," ",self.list_point[point])
@@ -161,6 +180,9 @@ class Solveur:
 		self.A = self.A.tocsr()
 		print("################## Assemblage ##################")
 		
+<<<<<<< HEAD:python/matrice.py
+=======
+>>>>>>> 1438f542c58ab5c7c8bb73c92b46109c480354b0:matrice.py
 		self.U = linalg.spsolve(self.A, self.B)
 
 	def export_all(self):
@@ -175,8 +197,11 @@ class Solveur:
 		np.savetxt("Mat/U.csv",self.U,fmt='%.12f',delimiter=',')
 
 	def u_inc(self,x,y):
-		alpha = 0
-		return np.exp(np.complex(0,1)*k*(x*np.cos(alpha) + y*np.sin(alpha)))
+<<<<<<< HEAD:python/matrice.py
+=======
+		alpha = self.alpha
+		return np.exp(np.complex(0,1)*self.k*(x*np.cos(alpha) + y*np.sin(alpha)))
+>>>>>>> 1438f542c58ab5c7c8bb73c92b46109c480354b0:matrice.py
 
 	# def save_sparse_matrix(filename, x):
 	#     x_csr = x.tocsr()
