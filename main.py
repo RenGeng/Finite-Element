@@ -6,6 +6,7 @@ from matrice import Solveur
 from export import export
 from argparse import ArgumentParser
 from numpy import pi
+from os.path import splitext
 
 parser = ArgumentParser()
 
@@ -37,9 +38,15 @@ if __name__ == '__main__':
 	                dest="k", default=2*pi,metavar="r",
 	                help="Valeur de la variable k [par defaut 2*pi]",type=float)
 
+	parser.add_argument("-p", "--paraview", dest="paraview",
+	                help="Nom du fichier paraview exporté [par defaut 'paraview/maillage.vtu']",default="Paraview/FILE.vtu", metavar="FILE")
+	#paraview
+
 	args = parser.parse_args()
 
 	# print(args.meshFile)
+	args.paraview = "Paraview/"+splitext(args.meshFile.split("/")[-1])[0]+".vtu"
+	print(args.paraview)
 
 	test = Solveur(args.meshFile,args.k,args.alpha,args.Dirichlet,args.Robin)
 
@@ -48,6 +55,6 @@ if __name__ == '__main__':
 	test.matriceRobin()
 	test.assemblage()
 	test.export_all()
-	export(test)
+	export(test,output=args.paraview)
 
 
