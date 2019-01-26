@@ -56,7 +56,7 @@ class Solveur:
 						# data.append(np.complex(0,1)*k*k*det_jaccob/24.0)
 					ind_ligne.append(I)
 					ind_col.append(J)
-					
+
 		# self.M = coo_matrix((np.array(data)*self.k*self.k, (ind_ligne,ind_col))).tocsr()
 		self.M = coo_matrix((np.array(data)*-self.k*self.k, (ind_ligne,ind_col))).tocsr() # prof
 
@@ -162,7 +162,8 @@ class Solveur:
 					self.A[point-1,:] = 0
 					# self.A[:, point-1] = 0
 					self.A[point-1,point-1] = 1
-					self.B[point-1] = self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1])
+					# self.B[point-1] = -self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1])
+					self.B[point-1] = self.u_inc(self.list_point[point-1][0], self.list_point[point-1][1]) # prof
 
 
 
@@ -183,8 +184,7 @@ class Solveur:
 		np.savetxt("Mat/U.csv",self.U,fmt='%.12f',delimiter=',')
 
 	def u_inc(self,x,y):
-		alpha = self.alpha
-		return np.exp(np.complex(0,1)*self.k*(x*np.cos(alpha) + y*np.sin(alpha)))
+		return np.exp(np.complex(0,1)*self.k*(x*np.cos(self.alpha) + y*np.sin(self.alpha)))
 
 	# def save_sparse_matrix(filename, x):
 	#     x_csr = x.tocsr()
