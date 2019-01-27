@@ -1,6 +1,6 @@
 # Projet de maillage et éléments finis
 
-Ceci est un projet académique consistant à résoudre le problème de diffraction d’une onde acoustique par un sous-marin par la méthode des éléments finis $P1$-Lagrange, vous trouverez plus d'informations en cliquant 
+Ceci est un projet académique consistant à résoudre le problème de diffraction d’une onde acoustique par un sous-marin par la méthode des éléments finis P1-Lagrange, vous trouverez plus d'informations en cliquant 
 :point_right:[ici](https://ljll.math.upmc.fr/bthierry/course/fem_tp/python_project/):point_left:.
 
 
