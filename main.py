@@ -39,14 +39,15 @@ if __name__ == '__main__':
 	                help="Valeur de la variable k [par defaut 2*pi]",type=float)
 
 	parser.add_argument("-p", "--paraview", dest="paraview",
-	                help="Nom du fichier paraview exporté [par defaut 'paraview/maillage.vtu']",default="Paraview/FILE.vtu", metavar="FILE")
+	                help="Nom du fichier paraview exporté [par defaut 'paraview/FILE.vtu']", metavar="FILE")
 	#paraview
 
 	args = parser.parse_args()
 
 	# print(args.meshFile)
-	args.paraview = "Paraview/"+splitext(args.meshFile.split("/")[-1])[0]+".vtu"
-	print(args.paraview)
+	if args.paraview is  None:
+		args.paraview = "Paraview/"+splitext(args.meshFile.split("/")[-1])[0]+".vtu"
+		# print(args.paraview)
 
 	test = Solveur(args.meshFile,args.k,args.alpha,args.Dirichlet,args.Robin)
 
