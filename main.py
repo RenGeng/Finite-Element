@@ -31,7 +31,7 @@ if __name__ == '__main__':
 	                help="Physical de la condition de Robin-Fourier [par defaut 2]",type=int)
 
 	parser.add_argument("-a", "--alpha",
-	                dest="alpha", default=pi/2,metavar="r",
+	                dest="alpha", default=pi,metavar="r",
 	                help="Valeur de la variable alpha [par defaut pi/2]",type=float)
 
 	parser.add_argument("-k",
@@ -39,14 +39,22 @@ if __name__ == '__main__':
 	                help="Valeur de la variable k [par defaut 2*pi]",type=float)
 
 	parser.add_argument("-p", "--paraview", dest="paraview",
-	                help="Nom du fichier paraview exporté [par defaut 'paraview/FILE.vtu']", metavar="FILE")
+	                help="Nom du fichier paraview exporté [par defaut 'Paraview/FILE.vtu']", metavar="FILE")
 	#paraview
+
+	parser.add_argument("--export", dest="export",action="store_true",
+	                help="Exporter les matrices elementaires dans le dossier Mat/ ")
 
 	args = parser.parse_args()
 
 	# print(args.meshFile)
 	if args.paraview is  None:
 		args.paraview = "Paraview/"+splitext(args.meshFile.split("/")[-1])[0]+".vtu"
+
+	# if args.export is None:
+	# 	args.export=False
+	# else:
+	# 	args.export=True
 		# print(args.paraview)
 
 	test = Solveur(args.meshFile,args.k,args.alpha,args.Dirichlet,args.Robin)
@@ -55,7 +63,9 @@ if __name__ == '__main__':
 	test.matriceRigidite()
 	test.matriceRobin()
 	test.assemblage()
-	test.export_all()
+	if args.export :
+		print("################ Export des matrices élémentaires ################")
+		test.export_all()
 	export(test,output=args.paraview)
 
 
